@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Input JSON from STDIN
+# {
+#   "params": {
+#     "files": ["*.tgz"]
+#   },
+#   "source": {
+#     "url": "https://download.opensuse.org",
+#     "regexp": "file-(.*).ext"
+#   }
+# }
+
+set -e
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+source $(dirname $0)/common.sh
+
+payload=$(mktemp /tmp/resource-in.XXXXXX)
+cat > $payload <&0
+
+parse_source_config
+
+source=$1
+
+if [ -z "$source" ]; then
+  echo "usage: $0 <path/to/source>"
+  exit 1
+fi
+
+files=$(jq -r '.params.files // "*"' < $payload)
+
+cd $source
+lftp -c "open $URL; mput $files"
+
+# The script must emit the resulting version of the resource.
+LISTING=$(ls -1 $files)
+parse_versions
+VERSION=$(echo $FOUND_VERSIONS | sort -rh | head -1)
+cat >&3 <<EOF
+{
+  "version": { "ref": "$VERSION" },
+  "metadata": [
+    { "name": "files", "value": "$uploaded" }
+  ]
+}
+EOF

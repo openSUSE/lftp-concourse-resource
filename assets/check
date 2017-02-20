@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# Input JSON from STDIN
+# {
+#   "source": {
+#     "url": "https://download.opensuse.org",
+#     "regexp": "file-(.*).ext"
+#   },
+#   "version": { "ref": "61cebf" }
+# }
+
+set -e
+IFS=" "
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+source $(dirname $0)/common.sh
+
+payload=$(mktemp /tmp/resource-in.XXXXXX)
+cat > $payload <&0
+
+parse_source_config
+
+output_single_version() {
+  cat >&3 <<EOF
+[
+  { "ref": "$1" }
+]
+EOF
+}
+
+output_current() {
+  CUR=$(echo $FOUND_VERSIONS | sort -rh | head -1)
+  output_single_version $CUR
+}
+
+output_newer_versions() {
+  VERSION="$1"
+  REFS=''
+  local IFS=$'\n'
+  for version in $FOUND_VERSIONS; do
+    NEW_REF="{ \"ref\": \"$version\" }"
+    if [ "${#REFS}" != "0" ]; then
+      NEW_REF="{ \"ref\": \"$version\" },"
+    fi
+
+    REFS=$NEW_REF$REFS # prepend because of ,
+
+    if [ "$version" = "$VERSION" ]; then
+      break
+    fi
+  done
+
+  # The list may be empty, if there are no versions available at the source.
+  OUTPUT_STRING="[ $REFS ]"
+  echo $OUTPUT_STRING >&3
+}
+
+get_listing
+parse_versions
+
+# version will be omitted from the first request, in which case the resource should return the current version (not every version since the resource's inception).
+if [ -z "$VERSION" ]; then
+  output_current
+
+else
+
+  POS=$(echo $FOUND_VERSIONS | sort -rh | nl | grep $VERSION | awk '{print $1}')
+  if [ -z "$POS" ]; then
+    # If your resource is unable to determine which versions are newer then the given version, then the current version of your resource should be returned.
+    output_current
+
+  elif [ "$POS" = "1" ]; then
+    # If the given version is already the latest, an array with that version as the sole entry should be listed.
+    output_single_version $VERSION
+
+  else
+    # print the array of new versions, in chronological order, to stdout, including the requested version if it's still valid.
+    output_newer_versions $VERSION
+
+  fi
+fi
