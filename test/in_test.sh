@@ -20,3 +20,12 @@ sh assets/in tmp <<EOF
   "version": { "ref": "4.9.10-1.1" }
 }
 EOF
+
+sh assets/in tmp <<EOF
+{
+  "source": {
+    "url": "http://download.opensuse.org/tumbleweed/repo/oss/suse/x86_64/",
+    "regexp": "kernel-default-(.*).x86_64.rpm"
+  }
+}
+EOF

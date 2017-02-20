@@ -26,6 +26,12 @@ DESTINATION_DIR=$1
 
 cd $DESTINATION_DIR
 
+if [ -z "$VERSION" ] || [ "$VERSION" == "latest" ]; then
+  get_listing
+  parse_versions
+  VERSION=$(echo $FOUND_VERSIONS | sort -rh | head -1)
+fi
+
 FILE=$(echo "$REGEXP" | sed -e "s/(.*)/$VERSION/")
 lftpget -c "$URL/$FILE"
 
