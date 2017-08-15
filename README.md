@@ -1,12 +1,12 @@
 # LFTP Resource
 
 A Concourse CI resource to interface with lftp.
-It can check any URL lftp understands and download files. Versioning is done via a glob, similar to the S3 resource.
+It can check any URL lftp understands and download files. Version checking is done listing the directory at `url` and applying a glob to find versions.
 
 
 ## Source Configuration
 
-* `url`: URL of the remote server
+* `url`: URL of the remote server, directory listing must be enabled.
 * `regexp`: The pattern to match filenames against within the servers directory listing. Only `(.*)` is supported. It's only supported once and gets translated to `([0-9.-]*)`.
 
 ## Example
