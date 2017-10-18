@@ -6,7 +6,7 @@ parse_source_config() {
 
 get_listing() {
   GLOB=$(echo "$REGEXP" | sed 's/(.*)/*/')
-  LISTING=$(lftp -c "open $URL; cls -1 $GLOB")
+  LISTING=$(lftp -c "open $URL; set cmd:cls-default ''; cls -1 $GLOB")
 }
 
 parse_versions() {
