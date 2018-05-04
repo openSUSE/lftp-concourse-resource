@@ -17,9 +17,6 @@ exec 1>&2 # redirect all output to stderr for logging
 
 source $(dirname $0)/common.sh
 
-payload=$(mktemp /tmp/resource-in.XXXXXX)
-cat > $payload <&0
-
 parse_source_config
 
 output_single_version() {
@@ -38,8 +35,9 @@ output_current() {
 output_newer_versions() {
   VERSION="$1"
   REFS=''
+  REVERSE_VERSIONS=$(echo $FOUND_VERSIONS | sort -rh)
   local IFS=$'\n'
-  for version in $FOUND_VERSIONS; do
+  for version in $REVERSE_VERSIONS; do
     NEW_REF="{ \"ref\": \"$version\" }"
     if [ "${#REFS}" != "0" ]; then
       NEW_REF="{ \"ref\": \"$version\" },"
