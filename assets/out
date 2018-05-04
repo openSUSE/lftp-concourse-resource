@@ -36,7 +36,8 @@ cd $source
 lftp -c "open $URL; mput $files"
 
 # The script must emit the resulting version of the resource.
-LISTING=$(ls -1 $files)
+#LISTING=$(ls -1 $files)
+get_listing
 parse_versions
 VERSION=$(echo $FOUND_VERSIONS | sort -rh | head -1)
 cat >&3 <<EOF
