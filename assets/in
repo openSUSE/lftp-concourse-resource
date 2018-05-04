@@ -33,7 +33,8 @@ if [ -z "$VERSION" ] || [ "$VERSION" == "latest" ]; then
 fi
 
 FILE=$(echo "$REGEXP" | sed -e "s/(.*)/$VERSION/")
-lftpget -c "$URL/$FILE"
+#lftpget -c "$URL/$FILE"
+lftp -c "open $URL; get $FILE"
 
 # The script must emit the fetched version, and may emit metadata as a list of key-value pairs. This data is intended for public consumption and will make it upstream, intended to be shown on the build's page.
 cat >&3 <<EOF
