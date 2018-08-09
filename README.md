@@ -8,8 +8,8 @@ It can check any URL lftp understands and download files. Version checking is do
 
 * `url`: URL of the remote server, directory listing must be enabled.
 * `regexp`: The pattern to match filenames against within the servers directory listing. Only `(.*)` is supported. It's only supported once and gets translated to `([0-9.-]*)`.
-TODO: update
-* `loose_matching`: If set to `true` the `regexp` pattern matching is not translated, so it matches against all characters.
+* `posix_regexp`: Like the above except that the patterns do not get translated. The first bracket will provide the version for the resource.
+
 
 ## Example
 
@@ -39,6 +39,35 @@ jobs:
         args: [-i, "*rpm"]
         directory: fresh-kernel
 ```
+
+Match against file names which have additional unknown bits like checksums for example:
+```
+resource_types:
+- name: lftp-resource
+  type: docker-image
+  source:
+      repository: machinerytool/concourse-lftp-resource
+      tag: latest
+
+resources:
+- name: fresh-kernel
+  type: lftp-resource
+  source:
+    url: http://download.opensuse.org/tumbleweed/repo/oss/suse/x86_64/
+    posix_regexp: kernel-default-([0-9.-]+)\.*.rpm
+
+jobs:
+- name: install-package
+  plan:
+  - get: fresh-kernel
+  - task: work
+    config:
+      run:
+        path: rpm
+        args: [-i, "*rpm"]
+        directory: fresh-kernel
+```
+
 
 ## Behaviour
 
