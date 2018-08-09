@@ -1,4 +1,4 @@
-FROM opensuse:42.2
+FROM opensuse/leap
 
 RUN zypper -n in jq lftp
 
