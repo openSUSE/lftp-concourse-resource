@@ -8,6 +8,8 @@ It can check any URL lftp understands and download files. Version checking is do
 
 * `url`: URL of the remote server, directory listing must be enabled.
 * `regexp`: The pattern to match filenames against within the servers directory listing. Only `(.*)` is supported. It's only supported once and gets translated to `([0-9.-]*)`.
+TODO: update
+* `loose_matching`: If set to `true` the `regexp` pattern matching is not translated, so it matches against all characters.
 
 ## Example
 

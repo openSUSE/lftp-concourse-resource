@@ -32,6 +32,11 @@ EOF
 
 output_current() {
   CUR=$(echo $FOUND_VERSIONS | sort -rh | head -1)
+  if [[ -z ${CUR} ]]; then
+    echo "Couldn't find a matching version"
+    exit 1
+  fi
+
   output_single_version $CUR
 }
 
