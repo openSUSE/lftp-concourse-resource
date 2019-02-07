@@ -34,7 +34,7 @@ fi
 files=$(jq -r '.params.files // "*"' < $payload)
 
 cd $source
-lftp -c "open $URL; mput $files"
+lftp -c "set sftp:auto-confirm yes; open $URL; mput $files"
 
 # The script must emit the resulting version of the resource.
 get_listing
